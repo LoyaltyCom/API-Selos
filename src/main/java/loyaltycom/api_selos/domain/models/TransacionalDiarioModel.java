@@ -18,7 +18,7 @@ import java.time.LocalDate;
 public class TransacionalDiarioModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @JsonFormat(pattern = "dd/MM/yyyy")
     @Column(name = "dt_movimento")

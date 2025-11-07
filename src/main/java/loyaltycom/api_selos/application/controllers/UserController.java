@@ -4,11 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import loyaltycom.api_selos.application.services.UserService;
 import loyaltycom.api_selos.domain.dtos.AtualizacaoSelosRequestDTO;
 import loyaltycom.api_selos.domain.dtos.LoginResponseDTO;
-import loyaltycom.api_selos.domain.dtos.TransacaoRequest;
 import loyaltycom.api_selos.domain.dtos.UserRequestDTO;
 import loyaltycom.api_selos.domain.exceptions.personalized_exceptions.UserAlreadyExistsException;
 import loyaltycom.api_selos.infra.common.JwtUtil;
-import loyaltycom.api_selos.infra.customers_routing_config.ClientContextHolder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,24 +61,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/transacao/{tenant}")
-    public ResponseEntity<?> realizarTransacao(@PathVariable("tenant") String tenant,
-                                               @RequestBody TransacaoRequest request) {
-        try {
-            ClientContextHolder.setCurrentDatabase(tenant);
-
-            return ResponseEntity.ok(userService.executarAcao(request));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(
-                    java.util.Map.of("error", "Erro interno: " + e.getMessage())
-            );
-        } finally {
-            ClientContextHolder.clear();
         }
     }
 }
