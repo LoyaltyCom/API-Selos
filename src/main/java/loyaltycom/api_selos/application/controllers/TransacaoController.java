@@ -47,4 +47,17 @@ public class TransacaoController {
             ClientContextHolder.clear();
         }
     }
+
+    @GetMapping("/diarias")
+    public ResponseEntity<List<TransacaoResponseDTO>> buscarTransacoesDiariasDoUsuarioNoCliente(@PathVariable("tenant") String tenant,
+                                                                                                @RequestParam(required = false) Integer idCliente) {
+        try {
+            ClientContextHolder.setCurrentDatabase(tenant);
+
+            return ResponseEntity.ok(transacaoService.buscarTransacoesDiariasDoUsuarioNoCliente(idCliente));
+        } finally {
+            ClientContextHolder.clear();
+        }
+    }
+
 }

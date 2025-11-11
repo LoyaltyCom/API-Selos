@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Hidden
 @Data
@@ -22,7 +23,7 @@ public class TransacionalDiarioModel {
 
     @JsonFormat(pattern = "dd/MM/yyyy")
     @Column(name = "dt_movimento")
-    private LocalDate dtMovimento;
+    private LocalDateTime dtMovimento;
 
     @Column(name = "id_loja")
     private Long idLoja;

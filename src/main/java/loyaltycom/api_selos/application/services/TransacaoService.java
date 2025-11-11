@@ -4,12 +4,15 @@ import jakarta.transaction.Transactional;
 import loyaltycom.api_selos.domain.dtos.TransacaoRequest;
 import loyaltycom.api_selos.domain.dtos.TransacaoResponseDTO;
 import loyaltycom.api_selos.domain.models.TransacaoModel;
+import loyaltycom.api_selos.domain.models.TransacionalDiarioModel;
 import loyaltycom.api_selos.domain.models.UserModel;
 import loyaltycom.api_selos.domain.repositories.TransacaoRepository;
+import loyaltycom.api_selos.domain.repositories.TransacionalDiarioRepository;
 import loyaltycom.api_selos.domain.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,10 +20,13 @@ import java.util.Map;
 public class TransacaoService {
     private final UserRepository userRepository;
     private final TransacaoRepository transacaoRepository;
+    private final TransacionalDiarioRepository transacionalDiarioRepository;
 
-    public TransacaoService(UserRepository userRepository, TransacaoRepository transacaoRepository) {
+    public TransacaoService(UserRepository userRepository, TransacaoRepository transacaoRepository,
+                            TransacionalDiarioRepository transacionalDiarioRepository) {
         this.userRepository = userRepository;
         this.transacaoRepository = transacaoRepository;
+        this.transacionalDiarioRepository = transacionalDiarioRepository;
     }
 
     @Transactional(rollbackOn = Exception.class)
@@ -106,5 +112,25 @@ public class TransacaoService {
 
     public List<TransacaoResponseDTO> buscarTransacoesInternasDoUsuario(Integer idCliente) {
         return transacaoRepository.findAllByIdCliente(idCliente);
+    }
+
+    public List<TransacaoResponseDTO> buscarTransacoesDiariasDoUsuarioNoCliente(Integer idCliente) {
+        List<TransacionalDiarioModel> transacoesEncontradas = transacionalDiarioRepository.findAllByIdCliente(idCliente);
+
+        List<TransacaoResponseDTO> transacoes = new ArrayList<>();
+
+        for (TransacionalDiarioModel model : transacoesEncontradas) {
+            String canalVenda = "Compra Fisíca";
+
+            if (model.getCanalVenda().equalsIgnoreCase("ecommerce")){
+                canalVenda = "Compra Online";
+            }
+
+            TransacaoResponseDTO dto = new TransacaoResponseDTO(model.getDtMovimento(), model.getQtdSeloTotal(), canalVenda);
+
+            transacoes.add(dto);
+        }
+
+        return transacoes;
     }
 }

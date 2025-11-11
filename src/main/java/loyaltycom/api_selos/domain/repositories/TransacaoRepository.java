@@ -15,5 +15,12 @@ public interface TransacaoRepository extends JpaRepository<TransacaoModel, Long>
     @Query(value = "INSERT INTO tb_transacoes (id_cliente, tipo, valor, dt_movimento) VALUES (:idCliente, :tipo, :valor, NOW())", nativeQuery = true)
     void registrarTransacao(Integer idCliente, String tipo, Integer valor);
 
+    @Query("""
+              SELECT new loyaltycom.api_selos.domain.dtos.TransacaoResponseDTO(
+                    t.dtMovimento, t.valor, t.tipo
+              )
+              FROM TransacaoModel t
+              WHERE t.idCliente = :idCliente
+            """)
     List<TransacaoResponseDTO> findAllByIdCliente(Integer idCliente);
 }
