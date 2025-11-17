@@ -62,7 +62,7 @@ public class TransacaoService {
             userRepository.save(destinatario);
 
             transacaoRepository.save(new TransacaoModel(
-                    null, quantidade, LocalDateTime.now(), "Transferência", remetente.getIdCliente(),
+                    null, -quantidade, LocalDateTime.now(), "Transferência", remetente.getIdCliente(),
                     LocalDateTime.now(), LocalDateTime.now()
             ));
 
@@ -97,7 +97,7 @@ public class TransacaoService {
             userRepository.save(remetente);
 
             transacaoRepository.save(new TransacaoModel(
-                    null, quantidade, LocalDateTime.now(), "Resgate", remetente.getIdCliente(),
+                    null, -quantidade, LocalDateTime.now(), "Resgate", remetente.getIdCliente(),
                     LocalDateTime.now(), LocalDateTime.now()
             ));
 

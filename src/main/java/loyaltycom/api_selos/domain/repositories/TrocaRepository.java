@@ -2,6 +2,8 @@ package loyaltycom.api_selos.domain.repositories;
 
 import loyaltycom.api_selos.domain.dtos.TrocaPendenteDTO;
 import loyaltycom.api_selos.domain.models.TrocaModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,23 +27,32 @@ public interface TrocaRepository extends JpaRepository<TrocaModel, Integer> {
             """, nativeQuery = true)
     Optional<List<TrocaPendenteDTO>> findPendentesComProduto(@Param("idCliente") Integer idCliente);
 
-    @Query(value = "SELECT " +
-            "t.id_produto, " +
-            "t.cod_troca, " +
-            "t.qtd_selos, " +
-            "t.valor_restante, " +
-            "t.criado_em, " +
-            "r.nome, " +
-            "r.img " +
-            "FROM tb_troca t " +
-            "JOIN tb_resgataveis r ON t.id_produto = r.id_produto " +
-            "WHERE t.id_cliente = :idCliente " +
-            "AND t.status = 'EXPIRADO' " +
-            "ORDER BY t.criado_em DESC", nativeQuery = true)
-    List<Object[]> buscarExpiradasRaw(@Param("idCliente") Integer idCliente);
+    @Query(value = """
+        SELECT
+            t.id_produto,
+            t.cod_troca,
+            t.qtd_selos,
+            t.valor_restante,
+            t.criado_em,
+            r.nome,
+            r.img
+        FROM tb_troca t
+        JOIN tb_resgataveis r ON t.id_produto = r.id_produto
+        WHERE t.id_cliente = :idCliente
+          AND t.status = 'EXPIRADO'
+        ORDER BY t.criado_em DESC
+        """,
+            countQuery = """
+        SELECT COUNT(*)
+        FROM tb_troca t
+        WHERE t.id_cliente = :idCliente
+          AND t.status = 'EXPIRADO'
+        """,
+            nativeQuery = true)
+    Page<Object[]> buscarExpiradasRaw(@Param("idCliente") Integer idCliente, Pageable pageable);
 
     @Query(value = """
-                SELECT 
+                SELECT
                     r.cod_troca,
                     r.dt_movimento::text,
                     p.nome,

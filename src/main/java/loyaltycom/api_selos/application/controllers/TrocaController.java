@@ -6,6 +6,8 @@ import loyaltycom.api_selos.domain.dtos.TrocaExpiradaDTO;
 import loyaltycom.api_selos.domain.dtos.TrocaPendenteDTO;
 import loyaltycom.api_selos.domain.models.TrocaModel;
 import loyaltycom.api_selos.infra.customers_routing_config.ClientContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,11 +62,11 @@ public class TrocaController {
     }
 
     @GetMapping("/expiradas/{idCliente}/{tenant}")
-    public ResponseEntity<List<TrocaExpiradaDTO>> buscarExpiradas(
-            @PathVariable("idCliente") Integer idCliente,
-            @PathVariable("tenant") String tenant) {
+    public ResponseEntity<Page<TrocaExpiradaDTO>> buscarExpiradas(@PathVariable Integer idCliente,
+                                                                  @PathVariable String tenant,
+                                                                  Pageable pageable) {
 
-        List<TrocaExpiradaDTO> expiradas = trocaService.buscarTrocasExpiradas(idCliente, tenant);
+        Page<TrocaExpiradaDTO> expiradas = trocaService.buscarTrocasExpiradas(idCliente, tenant, pageable);
 
         if (expiradas.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -72,6 +74,7 @@ public class TrocaController {
 
         return ResponseEntity.ok(expiradas);
     }
+
 
     @GetMapping("/colecao/{idCliente}/{tenant}")
     public ResponseEntity<List<TrocaColecaoDTO>> buscarColecao(@PathVariable("idCliente") Integer idCliente,

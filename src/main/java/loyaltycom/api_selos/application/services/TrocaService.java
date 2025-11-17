@@ -10,6 +10,8 @@ import loyaltycom.api_selos.domain.repositories.UserRepository;
 import loyaltycom.api_selos.infra.common.FieldsValidator;
 import loyaltycom.api_selos.infra.customers_routing_config.ClientContextHolder;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,14 +101,14 @@ public class TrocaService {
         }
     }
 
-    public List<TrocaExpiradaDTO> buscarTrocasExpiradas(Integer idCliente, String tenant) {
+    public Page<TrocaExpiradaDTO> buscarTrocasExpiradas(Integer idCliente, String tenant, Pageable pageable) {
         try {
             ClientContextHolder.setCurrentDatabase(tenant);
-            List<Object[]> results = trocaRepository.buscarExpiradasRaw(idCliente);
 
-            return results.stream().map(row -> {
+            Page<Object[]> results = trocaRepository.buscarExpiradasRaw(idCliente, pageable);
+
+            return results.map(row -> {
                 TrocaExpiradaDTO dto = new TrocaExpiradaDTO();
-
                 dto.setIdProduto(row[0] != null ? ((Number) row[0]).longValue() : null);
                 dto.setCodTroca((String) row[1]);
                 dto.setQtdSelos(row[2] != null ? ((Number) row[2]).intValue() : null);
@@ -114,22 +116,20 @@ public class TrocaService {
 
                 if (row[4] != null) {
                     Object criadoEmObj = row[4];
-                    if (criadoEmObj instanceof java.sql.Timestamp) {
-                        dto.setCriadoEm(((java.sql.Timestamp) criadoEmObj).toLocalDateTime());
-                    } else if (criadoEmObj instanceof java.time.Instant) {
-                        dto.setCriadoEm(LocalDateTime.ofInstant(
-                                (java.time.Instant) criadoEmObj,
-                                ZoneId.systemDefault()
-                        ));
-                    } else if (criadoEmObj instanceof LocalDateTime) {
-                        dto.setCriadoEm((LocalDateTime) criadoEmObj);
+                    if (criadoEmObj instanceof java.sql.Timestamp ts) {
+                        dto.setCriadoEm(ts.toLocalDateTime());
+                    } else if (criadoEmObj instanceof java.time.Instant inst) {
+                        dto.setCriadoEm(LocalDateTime.ofInstant(inst, ZoneId.systemDefault()));
+                    } else if (criadoEmObj instanceof LocalDateTime dt) {
+                        dto.setCriadoEm(dt);
                     }
                 }
+
                 dto.setNome((String) row[5]);
                 dto.setImg((String) row[6]);
 
                 return dto;
-            }).collect(Collectors.toList());
+            });
 
         } finally {
             ClientContextHolder.clear();
